@@ -7,6 +7,11 @@ try:
     df = pd.read_csv('device_data.csv', parse_dates=['Date'])
     df.set_index('Date', inplace=True)
     
+    # Convert numeric columns to appropriate data types
+    numeric_columns = ['Temperature [°C]', 'Humidity [%]', 'Wind speed [m/s]', 'Wind direction [°]', 'Air pressure [hPa]', 'Consumption (kWh)']
+    for column in numeric_columns:
+        df[column] = pd.to_numeric(df[column], errors='coerce')
+    
     # Get the actual data range
     data_start = df.index.min().strftime('%m/%d/%Y %H:%M:%S')
     data_end = df.index.max().strftime('%m/%d/%Y %H:%M:%S')
@@ -50,12 +55,12 @@ async def get_data_range(
         for date, row in data_range.iterrows():
             data_list.append({
                 "datetime": date.strftime('%m/%d/%Y %H:%M:%S'),
-                "temperature": round(row['Temperature [°C]'], 2),
-                "humidity": round(row['Humidity [%]'], 2),
-                "wind_speed": round(row['Wind speed [m/s]'], 2),
-                "wind_direction": round(row['Wind direction [°]'], 2),
-                "air_pressure": round(row['Air pressure [hPa]'], 2),
-                "consumption": round(row['Consumption (kWh)'], 2)
+                "temperature": round(row['Temperature [°C]'], 2) if pd.notnull(row['Temperature [°C]']) else None,
+                "humidity": round(row['Humidity [%]'], 2) if pd.notnull(row['Humidity [%]']) else None,
+                "wind_speed": round(row['Wind speed [m/s]'], 2) if pd.notnull(row['Wind speed [m/s]']) else None,
+                "wind_direction": round(row['Wind direction [°]'], 2) if pd.notnull(row['Wind direction [°]']) else None,
+                "air_pressure": round(row['Air pressure [hPa]'], 2) if pd.notnull(row['Air pressure [hPa]']) else None,
+                "consumption": round(row['Consumption (kWh)'], 2) if pd.notnull(row['Consumption (kWh)']) else None
             })
         
         # Prepare the response

@@ -48,15 +48,16 @@ async def get_data_range(
         # Convert the data to a list of dictionaries (JSON-serializable format)
         data_list = []
         for date, row in data_range.iterrows():
-            data_list.append({
+            data_item = {
                 "datetime": date.strftime('%m/%d/%Y %H:%M:%S'),
-                "temperature": round(row['Temperature [°C]'], 2),
-                "humidity": round(row['Humidity [%]'], 2),
-                "wind_speed": round(row['Wind speed [m/s]'], 2),
-                "wind_direction": round(row['Wind direction [°]'], 2),
-                "air_pressure": round(row['Air pressure [hPa]'], 2),
-                "consumption": round(row['Consumption (kWh)'], 2)
-            })
+                "temperature": round(row['Temperature [°C]'], 2) if pd.api.types.is_numeric_dtype(row['Temperature [°C]']) else None,
+                "humidity": round(row['Humidity [%]'], 2) if pd.api.types.is_numeric_dtype(row['Humidity [%]']) else None,
+                "wind_speed": round(row['Wind speed [m/s]'], 2) if pd.api.types.is_numeric_dtype(row['Wind speed [m/s]']) else None,
+                "wind_direction": round(row['Wind direction [°]'], 2) if pd.api.types.is_numeric_dtype(row['Wind direction [°]']) else None,
+                "air_pressure": round(row['Air pressure [hPa]'], 2) if pd.api.types.is_numeric_dtype(row['Air pressure [hPa]']) else None,
+                "consumption": round(row['Consumption (kWh)'], 2) if pd.api.types.is_numeric_dtype(row['Consumption (kWh)']) else None
+            }
+            data_list.append(data_item)
         
         # Prepare the response
         response = {

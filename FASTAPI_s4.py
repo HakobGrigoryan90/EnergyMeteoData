@@ -4,8 +4,8 @@ from datetime import datetime
 
 # Load the CSV file
 try:
-    df = pd.read_csv('device_data.csv', parse_dates=['Date'])
-    df.set_index('Date', inplace=True)
+    df = pd.read_csv('device_data.csv', parse_dates=['Timestamp'])
+    df.set_index('Timestamp', inplace=True)
     
     # Get the actual data range
     data_start = df.index.min().strftime('%m/%d/%Y %H:%M:%S')

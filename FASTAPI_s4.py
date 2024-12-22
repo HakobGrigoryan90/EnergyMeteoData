@@ -49,7 +49,7 @@ async def get_data_range(
         data_list = []
         for date, row in data_range.iterrows():
             data_list.append({
-                "date": timestamp.strftime('%m/%d/%Y %H:%M:%S'),
+                "date": date.strftime('%Y-%m-%d'),
                 "average_temperature": round(row['Average temperature [°C]'], 2),
                 "average_humidity": round(row['Average relative humidity [%]'], 2),
                 "wind_speed": round(row['Wind speed [m/s]'], 2),
@@ -58,6 +58,7 @@ async def get_data_range(
                 "average_air_pressure": round(row['Average air pressure [hPa]'], 2),
                 "consumption": round(row['Consumption (kWh)'], 2)
             })
+        
         
         # Prepare the response
         response = {

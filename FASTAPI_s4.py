@@ -5,11 +5,12 @@ from datetime import datetime
 # Load the CSV file
 try:
     df = pd.read_csv('device_data.csv', parse_dates=['Timestamp'])
+    df['Timestamp'] = pd.to_datetime(df['Timestamp'], format='%m/%d/%Y %I:%M:%S %p')
     df.set_index('Timestamp', inplace=True)
     
     # Get the actual data range
-    data_start = df.index.min().strftime('%m/%d/%Y %H:%M')
-    data_end = df.index.max().strftime('%m/%d/%Y %H:%M')
+    data_start = df.index.min().strftime('%m/%d/%Y %I:%M:%S %p')
+    data_end = df.index.max().strftime('%m/%d/%Y %I:%M:%S %p')
 except FileNotFoundError:
     raise RuntimeError("The file 'device_data.csv' was not found. Please ensure the file is in the correct location.")
 
@@ -29,13 +30,13 @@ async def get_data_info():
 
 @app.get("/api/get_data_range")
 async def get_data_range(
-    from_timestamp: str = Query(..., description="Start timestamp in format 'MM/DD/YYYY HH:MM:SS'"),
-    to_timestamp: str = Query(..., description="End timestamp in format 'MM/DD/YYYY HH:MM:SS'")
+    from_timestamp: str = Query(..., description="Start timestamp in format 'MM/DD/YYYY HH:MM:SS AM/PM'"),
+    to_timestamp: str = Query(..., description="End timestamp in format 'MM/DD/YYYY HH:MM:SS AM/PM'")
 ):
     try:
         # Parse the input timestamps
-        from_dt = datetime.strptime(from_timestamp, '%m/%d/%Y %H:%M:%S')
-        to_dt = datetime.strptime(to_timestamp, '%m/%d/%Y %H:%M:%S')
+        from_dt = datetime.strptime(from_timestamp, '%m/%d/%Y %I:%M:%S %p')
+        to_dt = datetime.strptime(to_timestamp, '%m/%d/%Y %I:%M:%S %p')
         
         # Check if the requested range is within the available data range
         if from_dt < df.index.min() or to_dt > df.index.max():
@@ -49,7 +50,7 @@ async def get_data_range(
         data_list = []
         for timestamp, row in data_range.iterrows():
             data_list.append({
-                "timestamp": timestamp.strftime('%m/%d/%Y %H:%M:%S'),
+                "timestamp": timestamp.strftime('%m/%d/%Y %I:%M:%S %p'),
                 "temperature": round(row['Temperature [°C]'], 2),
                 "humidity": round(row['Humidity [%]'], 2),
                 "wind_speed": round(row['Wind speed [m/s]'], 2),
@@ -70,7 +71,7 @@ async def get_data_range(
     except KeyError:
         raise HTTPException(status_code=404, detail="Data not found for the specified timestamp range")
     except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid timestamp format. Please use 'MM/DD/YYYY HH:MM:SS'")
+        raise HTTPException(status_code=400, detail="Invalid timestamp format. Please use 'MM/DD/YYYY HH:MM:SS AM/PM'")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 

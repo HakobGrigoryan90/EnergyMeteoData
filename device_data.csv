@@ -1,4 +1,4 @@
-Date,Average temperature [°C],Average relative humidity [%],Wind speed [m/s],Average wind direction [°],Precipitation [mm],Average air pressure [hPa],Consumption (kWh)
+Timestamp,Average temperature [°C],Average relative humidity [%],Wind speed [m/s],Average wind direction [°],Precipitation [mm],Average air pressure [hPa],Consumption (kWh)
 10/1/2021 1:00,9.3,77,5.1,163,0,1028.4,2.3
 10/1/2021 2:00,9.4,77,4.9,164,0,1028.3,5.28
 10/1/2021 3:00,9.2,80,4.7,153,0,1028.1,7.93

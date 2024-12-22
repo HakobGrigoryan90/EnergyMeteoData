@@ -56,24 +56,21 @@ async def get_data_range(
         mask = (df.index >= from_dt) & (df.index <= to_dt)
         data_range = df.loc[mask]
         
-        # Convert the data to a list of dictionaries (JSON-serializable format)
-        data_list = []
+        # Convert the data to a dictionary with timestamps as keys
+        data_dict = {}
         for timestamp, row in data_range.iterrows():
-            data_list.append({
-                "timestamp": timestamp.strftime('%m/%d/%Y %H:%M:%S'),
+            data_dict[timestamp.strftime('%m/%d/%Y %H:%M:%S')] = {
                 "temperature": round(row['Temperature [°C]'], 2),
                 "humidity": round(row['Humidity [%]'], 2),
                 "wind_speed": round(row['Wind speed [m/s]'], 2),
                 "wind_direction": round(row['Wind direction [°]'], 2),
                 "air_pressure": round(row['Air pressure [hPa]'], 2),
                 "consumption": round(row['Consumption (kWh)'], 2)
-            })
+            }
         
-        # Prepare the response
+        # Prepare the response with a single property
         response = {
-            "from_timestamp": from_timestamp,
-            "to_timestamp": to_timestamp,
-            "data": data_list
+            "device_data": data_dict
         }
         
         return response

@@ -4,21 +4,26 @@ from datetime import datetime
 
 # Load the CSV file
 try:
-    df = pd.read_csv('electricity_meteo_data.csv', parse_dates=['Timestamp'])
-    df.set_index('Timestamp', inplace=True)
+    df = pd.read_csv('device_data.csv', parse_dates=['Date'])
+    df.set_index('Date', inplace=True)
     
     # Get the actual data range
-    data_start = df.index.min().strftime('%m/%d/%Y %H:%M')
-    data_end = df.index.max().strftime('%m/%d/%Y %H:%M')
+    data_start = df.index.min().strftime('%m/%d/%Y %H:%M:%S')
+    data_end = df.index.max().strftime('%m/%d/%Y %H:%M:%S')
 except FileNotFoundError:
-    raise RuntimeError("The file 'electricity_meteo_data.csv' was not found. Please ensure the file is in the correct location.")
+    raise RuntimeError("The file 'device_data.csv' was not found. Please ensure the file is in the correct location.")
 
 # Create FastAPI app instance
-app = FastAPI(title="Electricity and Meteorological Data API",
-              description=f"This API provides access to electricity and meteorological data from {data_start} to {data_end}.")
+app = FastAPI(
+    title="Device Data API",
+    description=f"This API provides access to device data from {data_start} to {data_end}."
+)
 
 @app.get("/api/data_info")
 async def get_data_info():
+    """
+    Returns information about the data range and total number of records.
+    """
     return {
         "data_range": {
             "start": data_start,
@@ -32,6 +37,9 @@ async def get_data_range(
     from_timestamp: str = Query(..., description="Start timestamp in format 'MM/DD/YYYY HH:MM:SS'"),
     to_timestamp: str = Query(..., description="End timestamp in format 'MM/DD/YYYY HH:MM:SS'")
 ):
+    """
+    Retrieves data for a specific timestamp range.
+    """
     try:
         # Parse the input timestamps
         from_dt = datetime.strptime(from_timestamp, '%m/%d/%Y %H:%M:%S')
@@ -39,7 +47,10 @@ async def get_data_range(
         
         # Check if the requested range is within the available data range
         if from_dt < df.index.min() or to_dt > df.index.max():
-            raise HTTPException(status_code=400, detail=f"Requested date range is outside the available data range ({data_start} to {data_end})")
+            raise HTTPException(
+                status_code=400,
+                detail=f"Requested date range is outside the available data range ({data_start} to {data_end})"
+            )
         
         # Get the data for the specified timestamp range
         mask = (df.index >= from_dt) & (df.index <= to_dt)
@@ -50,12 +61,11 @@ async def get_data_range(
         for timestamp, row in data_range.iterrows():
             data_list.append({
                 "timestamp": timestamp.strftime('%m/%d/%Y %H:%M:%S'),
-                "average_temperature": round(row['Average temperature [°C]'], 2),
-                "average_humidity": round(row['Average relative humidity [%]'], 2),
+                "temperature": round(row['Temperature [°C]'], 2),
+                "humidity": round(row['Humidity [%]'], 2),
                 "wind_speed": round(row['Wind speed [m/s]'], 2),
-                "average_wind_direction": round(row['Average wind direction [°]'], 2),
-                "precipitation": round(row['Precipitation [mm]'], 2),
-                "average_air_pressure": round(row['Average air pressure [hPa]'], 2),
+                "wind_direction": round(row['Wind direction [°]'], 2),
+                "air_pressure": round(row['Air pressure [hPa]'], 2),
                 "consumption": round(row['Consumption (kWh)'], 2)
             })
         
